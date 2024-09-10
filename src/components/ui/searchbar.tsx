@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useEffect, useState, useRef } from "react";
+import { useEffect} from "react";
 import WeatherData from "../../services/services/api/weatherData";
 
 const SearchBarStyle = styled.div`
@@ -18,28 +18,23 @@ const SearchBarStyle = styled.div`
 `
 
 export default function SearchBar(props: any) {
-    const [location, setLocation] = useState('')
-    const [weatherData, setWeatherData] = useState({});
-    const isFirstRender: React.MutableRefObject<boolean> = useRef<boolean>(true); 
-
+    const setWeatherData = props.WeatherDataSetter;
+    const setFirstSearch = props.FirstSearchSetter;
+    const locationState = props.LocationState;
+    
     useEffect(()=> {
-        console.log(location);
-    },[location])
-    useEffect(() => {
-        if(isFirstRender.current) {
-            isFirstRender.current = false;
-            return;
-        }
-        console.log(weatherData);
-    },[weatherData])
+        console.log(locationState.location);
+    },[locationState.location])
+
 
     return(
         <SearchBarStyle>
-            <input type="text" placeholder="search city" value={location} onChange={e => setLocation(e.target.value)}/>
+            <input type="text" placeholder="search city" value={locationState.location} onChange={e => locationState.setLocation(e.target.value)}/>
             <button onClick={async () => {
-                if(location == '')
+                if(locationState.location == '')
                     return;
-                setWeatherData(await WeatherData(location));
+                setWeatherData(await WeatherData(locationState.location));
+                setFirstSearch(true);
             }}> 🔎 </button>
         </SearchBarStyle>
     )

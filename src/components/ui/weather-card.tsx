@@ -8,8 +8,7 @@ export default function WeatherCard(props: any) {
     let city: string = props.city;
     let temperature: string = props.temperature;
     let weather: string = props.weather;
-    let testObject = props.testObject;
-    let date;
+
     return(
         <WeatherCardStyle>
             <h4> {city}, {new Date().getMonth()}/{new Date().getDate()} </h4>
