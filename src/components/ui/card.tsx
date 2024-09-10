@@ -6,8 +6,7 @@ const CardStyle = styled.div`
  h2 {
     margin-left: .35rem;
     margin-right: .35rem;
- }
- 
+ } 
 `
 export default function Card(props: any) {
     let attributeTitle: string = props.title;
