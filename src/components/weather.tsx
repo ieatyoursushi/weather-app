@@ -4,7 +4,8 @@ import SearchBar from "./ui/searchbar"
 import { useEffect, useState, useRef } from "react" 
 import styled from "styled-components"
 import MakeObjectMappable from "../utils/makeObjectMappable"
-import mainWeatherSchema from "../utils/apiSchemas"
+import mainWeatherSchema from "../utils/apiSchemas/weatherCondition"
+import WeatherCondition from "../utils/weatherCondition"
 
 const WeatherAttributes = styled.div`
     display: grid;
@@ -34,6 +35,7 @@ export default function Weather() {
     const [location, setLocation] = useState('');
     const [weatherData, setWeatherData] = useState(mainWeatherSchema);
     const isFirstRender = useRef<boolean>(true);
+    const [cityNotFound, setCityNotFound] = useState(false);
     const [firstSearch, setFirstSearch] = useState(false);
 
     useEffect(() => {
@@ -44,7 +46,7 @@ export default function Weather() {
         console.log(weatherData);
         console.log(weatherAttributes);
     },[weatherData])
-    
+
     const updateWeatherState = (newObject: any) => {
         setWeatherData(newObject);
     }
@@ -57,16 +59,26 @@ export default function Weather() {
     //components in brackets should not have state
     return (
         <WeatherWrapper>
-            <SearchBar LocationState={{location, setLocation}} WeatherDataSetter={updateWeatherState} FirstSearchSetter={(value: any) => setFirstSearch(value)}/>
+            <SearchBar CityNotFound={{cityNotFound, setCityNotFound}} LocationState={{location, setLocation}} WeatherDataSetter={updateWeatherState} FirstSearchSetter={(value: any) => setFirstSearch(value)}/>
             {firstSearch ?
+
             <>
-                <WeatherCard city={location} temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m} weather="image attribute (in progress)"/>
+                {cityNotFound ? 
+                    <h1 style={{color: "red"}}>City Not Found</h1> : 
+                <>
+                <WeatherCard city={location} temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m} weather={WeatherCondition(weatherData.current.precipitation!, weatherData.current.cloud_cover!)}/>
                 <WeatherAttributes>
                     {weatherAttributes.map((attribute, index) => 
-                        <Card title={Object.keys(attribute!)[0]+" " +  emojis[index]} result={Object.values(attribute!)[0]! + Object.values(weatherAttributeUnits[index]!) }/>
+                        <Card title={Object.keys(attribute!)[0]+" " +  emojis[index]} result={Object.values(attribute!)[0]! + Object.values(weatherAttributeUnits[index]!) } key={index}/>
                     )}
                 </WeatherAttributes>
-            </> : <h1> Enter City Name </h1>
+                 
+                </>
+                }
+
+            </> 
+            
+            : <h1> Enter City Name </h1>
             }
  
         </WeatherWrapper>

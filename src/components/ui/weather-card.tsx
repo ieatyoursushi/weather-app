@@ -1,7 +1,14 @@
 import styled from "styled-components";
 const WeatherCardStyle = styled.div`
     text-align: center;
-    
+    h2 {
+        font-size: 40px;
+        margin: 0; margin-bottom: 5px;
+    }
+    h1 {
+        margin-bottom: 15px;
+    }
+
 `
 
 export default function WeatherCard(props: any) {

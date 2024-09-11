@@ -21,7 +21,9 @@ export default function SearchBar(props: any) {
     const setWeatherData = props.WeatherDataSetter;
     const setFirstSearch = props.FirstSearchSetter;
     const locationState = props.LocationState;
-    
+    const cityNotFound = props.CityNotFound;
+    const locationIndex = props.LocationIndex;
+
     useEffect(()=> {
         console.log(locationState.location);
     },[locationState.location])
@@ -29,12 +31,21 @@ export default function SearchBar(props: any) {
 
     return(
         <SearchBarStyle>
-            <input type="text" placeholder="search city" value={locationState.location} onChange={e => locationState.setLocation(e.target.value)}/>
+            <input type="text" placeholder="search cities" value={locationState.location} onChange={e => locationState.setLocation(e.target.value)}/>
             <button onClick={async () => {
                 if(locationState.location == '')
                     return;
-                setWeatherData(await WeatherData(locationState.location));
-                setFirstSearch(true);
+
+                //in the index component's onclick, this onclick should set another boolean state
+                //fetch geolocation api in here instead of WeatherData
+                try{
+                    setWeatherData(await WeatherData(locationState.location, 1));
+                    if(cityNotFound.setCityNotFound) 
+                        cityNotFound.setCityNotFound(false);
+                    setFirstSearch(true);
+                } catch(err) {
+                    cityNotFound.setCityNotFound(true);
+                }
             }}> 🔎 </button>
         </SearchBarStyle>
     )
