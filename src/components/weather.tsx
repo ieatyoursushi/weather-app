@@ -6,7 +6,8 @@ import styled from "styled-components"
 import MakeObjectMappable from "../utils/makeObjectMappable"
 import mainWeatherSchema from "../utils/apiSchemas/weatherCondition"
 import WeatherCondition from "../utils/weatherCondition"
-
+import geoLocationSchema from "../utils/apiSchemas/geoLocations"
+import LocationsIndex from "./locationsIndex";
 const WeatherAttributes = styled.div`
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -34,23 +35,22 @@ const WeatherWrapper = styled.div`
 export default function Weather() {
     const [location, setLocation] = useState('');
     const [weatherData, setWeatherData] = useState(mainWeatherSchema);
-    const isFirstRender = useRef<boolean>(true);
     const [cityNotFound, setCityNotFound] = useState(false);
+    const [locations, setLocations] = useState(geoLocationSchema);
+    const [isChoosingCity, setIsChoosingCity] = useState(false);
+    const [clickedIndex, setClikedIndex] = useState(0);
     const [firstSearch, setFirstSearch] = useState(false);
-
+    const isFirstRender = useRef<boolean>(true);
+    
     useEffect(() => {
         if(isFirstRender.current) {
             isFirstRender.current = false;
             return;
         }
-        console.log(weatherData);
+        console.log(locations);
         console.log(weatherAttributes);
-    },[weatherData])
+    },[locations])
 
-    const updateWeatherState = (newObject: any) => {
-        setWeatherData(newObject);
-    }
-    
     const weatherAttributes = MakeObjectMappable(weatherData.current);
     const weatherAttributeUnits = MakeObjectMappable(weatherData.current_units);
     //use utilities to dynamically fill emojis like cold to hot emoji
@@ -59,20 +59,23 @@ export default function Weather() {
     //components in brackets should not have state
     return (
         <WeatherWrapper>
-            <SearchBar CityNotFound={{cityNotFound, setCityNotFound}} LocationState={{location, setLocation}} WeatherDataSetter={updateWeatherState} FirstSearchSetter={(value: any) => setFirstSearch(value)}/>
+            <SearchBar ChoosingLocation={{isChoosingCity, setIsChoosingCity}} SetLocation={(value: any) => setLocations(value)} CityNotFound={{cityNotFound, setCityNotFound}} LocationState={{location, setLocation}}  FirstSearchSetter={(value: boolean) => setFirstSearch(value)}/>
             {firstSearch ?
-
             <>
-                {cityNotFound ? 
-                    <h1 style={{color: "red"}}>City Not Found</h1> : 
+                {isChoosingCity ?
+                    <LocationsIndex setClickedIndex={(value: number) => setClikedIndex(value)} locations={locations} choosingCity={{isChoosingCity, setIsChoosingCity}} setWeatherData={(value: any) => setWeatherData(value)}/> :
                 <>
-                <WeatherCard city={location} temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m} weather={WeatherCondition(weatherData.current.precipitation!, weatherData.current.cloud_cover!)}/>
-                <WeatherAttributes>
-                    {weatherAttributes.map((attribute, index) => 
-                        <Card title={Object.keys(attribute!)[0]+" " +  emojis[index]} result={Object.values(attribute!)[0]! + Object.values(weatherAttributeUnits[index]!) } key={index}/>
-                    )}
-                </WeatherAttributes>
-                 
+                    {cityNotFound ? 
+                        <h1 style={{color: "red"}}>City Not Found</h1> : 
+                    <>
+                        <WeatherCard city={locations.results[clickedIndex].name +" "+ (locations.results[clickedIndex].admin1 != null ? locations.results[clickedIndex].admin1 : "")} temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m} weather={WeatherCondition(weatherData.current.precipitation!, weatherData.current.cloud_cover!)}/>
+                        <WeatherAttributes>
+                            {weatherAttributes.map((attribute, index) => 
+                                <Card title={Object.keys(attribute!)[0]+" " +  emojis[index]} result={Object.values(attribute!)[0]! + Object.values(weatherAttributeUnits[index]!) } key={index}/>
+                            )}
+                        </WeatherAttributes>
+                    </>
+                    }
                 </>
                 }
 

@@ -18,7 +18,7 @@ export default function WeatherCard(props: any) {
 
     return(
         <WeatherCardStyle>
-            <h4> {city}, {new Date().getMonth()}/{new Date().getDate()} </h4>
+            <h4> {city} {new Date().getMonth()}/{new Date().getDate()} </h4>
             <h1> {temperature} </h1>
             <h2> {weather} </h2>
         </WeatherCardStyle>

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useEffect} from "react";
-import WeatherData from "../../services/services/api/weatherData";
+import GeoLocation from "../../services/services/api/geoLocationData";
 
 const SearchBarStyle = styled.div`
  
@@ -18,11 +18,12 @@ const SearchBarStyle = styled.div`
 `
 
 export default function SearchBar(props: any) {
-    const setWeatherData = props.WeatherDataSetter;
+    //const setWeatherData = props.WeatherDataSetter;
     const setFirstSearch = props.FirstSearchSetter;
     const locationState = props.LocationState;
     const cityNotFound = props.CityNotFound;
-    const locationIndex = props.LocationIndex;
+    const isChoosingLocationState = props.ChoosingLocation;
+    const setLocations = props.SetLocation;
 
     useEffect(()=> {
         console.log(locationState.location);
@@ -35,9 +36,23 @@ export default function SearchBar(props: any) {
             <button onClick={async () => {
                 if(locationState.location == '')
                     return;
-
+ 
                 //in the index component's onclick, this onclick should set another boolean state
                 //fetch geolocation api in here instead of WeatherData
+                //change cityNotFound state for geolocation try catch instead of weatherData 
+                try {
+                    setLocations(await GeoLocation(locationState.location));
+                    if(!isChoosingLocationState.isChoosingCity)
+                        isChoosingLocationState.setIsChoosingCity(true);
+                    if(cityNotFound.cityNotFound) 
+                        cityNotFound.setCityNotFound(false);
+                    setFirstSearch(true);
+                } catch(err) {
+                    console.error(err);
+                    cityNotFound.setCityNotFound(true);
+                    isChoosingLocationState.setIsChoosingCity(false);
+                }
+                /*
                 try{
                     setWeatherData(await WeatherData(locationState.location, 1));
                     if(cityNotFound.setCityNotFound) 
@@ -46,6 +61,7 @@ export default function SearchBar(props: any) {
                 } catch(err) {
                     cityNotFound.setCityNotFound(true);
                 }
+                */
             }}> 🔎 </button>
         </SearchBarStyle>
     )
