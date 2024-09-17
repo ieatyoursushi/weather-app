@@ -9,7 +9,7 @@ const weatherConditions = {
 
 export default function WeatherCondition(precipitation: number, cloud_cover: number): string {
         const partiallyCloudy: boolean = cloud_cover >= 25 && cloud_cover < 75;
-        const rainy: boolean = precipitation > 1;
+        const rainy: boolean = precipitation >= 1;
         const sunny: boolean = cloud_cover < 25;
         const cloudy: boolean = cloud_cover > 75;
         const lightRain: boolean = precipitation > 0 && precipitation < 1;

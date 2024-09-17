@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import WeatherData from "../../services/services/api/weatherData";
-const LocationCardWrapper = styled.div`
+
+const LocationCardWrapper = styled.article`
     border: 3px solid;
     border-radius:7px;
     margin-top: 5px;
@@ -21,9 +22,11 @@ export default function LocationCard(props: any) {
             console.log(`you clicked on location index ${index}`)
             try {
                 setClickedIndex(index);
-                setWeatherData(await WeatherData(location.latitude, location.longitude, index));
+                setWeatherData(await WeatherData(location.latitude, location.longitude));
                 isChoosingCityState.setIsChoosingCity(false);
+
             } catch(err) {
+
                 console.log(err);
             }
         }}>

@@ -8,6 +8,8 @@ import mainWeatherSchema from "../utils/apiSchemas/weatherCondition"
 import WeatherCondition from "../utils/weatherCondition"
 import geoLocationSchema from "../utils/apiSchemas/geoLocations"
 import LocationsIndex from "./locationsIndex";
+ 
+ 
 const WeatherAttributes = styled.div`
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -39,9 +41,10 @@ export default function Weather() {
     const [locations, setLocations] = useState(geoLocationSchema);
     const [isChoosingCity, setIsChoosingCity] = useState(false);
     const [clickedIndex, setClikedIndex] = useState(0);
-    const [firstSearch, setFirstSearch] = useState(false);
+    const [firstSearch, setFirstSearch] = useState<boolean>(false);
     const isFirstRender = useRef<boolean>(true);
     
+
     useEffect(() => {
         if(isFirstRender.current) {
             isFirstRender.current = false;
@@ -50,40 +53,59 @@ export default function Weather() {
         console.log(locations);
         console.log(weatherAttributes);
     },[locations])
-
+    
     const weatherAttributes = MakeObjectMappable(weatherData.current);
     const weatherAttributeUnits = MakeObjectMappable(weatherData.current_units);
     //use utilities to dynamically fill emojis like cold to hot emoji
     const emojis = ['💧','🔎','😡','🌧️','☁️','💨'];
-
-    //components in brackets should not have state
+    
+    const ApplicationState = () => {
+        if (cityNotFound) 
+            return <h1 style={{ color: "red" }}> City Not Found</h1>;
+        if (!firstSearch) 
+            return <h1> Enter City Name </h1>;
+        if (isChoosingCity)
+            return (
+                <LocationsIndex
+                    setClickedIndex={(value: number) => setClikedIndex(value)}
+                    locations={locations}
+                    choosingCity={{ isChoosingCity, setIsChoosingCity }}
+                    setWeatherData={(value: any) => setWeatherData(value)}
+                />
+            )
+        return (
+            <>
+                <WeatherCard
+                    city={
+                        locations.results[clickedIndex].name +" " +
+                        (locations.results[clickedIndex].admin1 != null ? locations.results[clickedIndex].admin1 : "")
+                    }
+                    temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m}
+                    weather={WeatherCondition(weatherData.current.precipitation!, weatherData.current.cloud_cover!)}
+                />
+                <WeatherAttributes>
+                    {weatherAttributes.map((attribute, index) => (
+                        <Card
+                            title={Object.keys(attribute!)[0] + " " + emojis[index]}
+                            result={Object.values(attribute!)[0]! + Object.values(weatherAttributeUnits[index]!)}
+                            key={index}
+                        />
+                    ))}
+                </WeatherAttributes>
+            </>     
+        );
+    }
     return (
         <WeatherWrapper>
-            <SearchBar ChoosingLocation={{isChoosingCity, setIsChoosingCity}} SetLocation={(value: any) => setLocations(value)} CityNotFound={{cityNotFound, setCityNotFound}} LocationState={{location, setLocation}}  FirstSearchSetter={(value: boolean) => setFirstSearch(value)}/>
-            {firstSearch ?
-            <>
-                {isChoosingCity ?
-                    <LocationsIndex setClickedIndex={(value: number) => setClikedIndex(value)} locations={locations} choosingCity={{isChoosingCity, setIsChoosingCity}} setWeatherData={(value: any) => setWeatherData(value)}/> :
-                <>
-                    {cityNotFound ? 
-                        <h1 style={{color: "red"}}>City Not Found</h1> : 
-                    <>
-                        <WeatherCard city={locations.results[clickedIndex].name +" "+ (locations.results[clickedIndex].admin1 != null ? locations.results[clickedIndex].admin1 : "")} temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m} weather={WeatherCondition(weatherData.current.precipitation!, weatherData.current.cloud_cover!)}/>
-                        <WeatherAttributes>
-                            {weatherAttributes.map((attribute, index) => 
-                                <Card title={Object.keys(attribute!)[0]+" " +  emojis[index]} result={Object.values(attribute!)[0]! + Object.values(weatherAttributeUnits[index]!) } key={index}/>
-                            )}
-                        </WeatherAttributes>
-                    </>
-                    }
-                </>
-                }
+            <SearchBar 
+                ChoosingLocation={{isChoosingCity, setIsChoosingCity}} 
+                SetLocation={(value: any) => setLocations(value)} 
+                CityNotFound={{cityNotFound, setCityNotFound}} 
+                LocationState={{location, setLocation}} 
+                FirstSearchSetter={(value: boolean) => setFirstSearch(value)} 
+            />
+            {ApplicationState()}
 
-            </> 
-            
-            : <h1> Enter City Name </h1>
-            }
- 
         </WeatherWrapper>
 
     )

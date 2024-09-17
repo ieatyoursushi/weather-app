@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import LocationCard from "./ui/location-card";
-
+ 
 const LocationsIndexStyle = styled.div`
     display: flex;
     flex-direction: column;
@@ -17,11 +17,12 @@ export default function LocationsIndex(props: any) {
     const choosingCityState = props.choosingCity;
     const weatherDataSetter = props.setWeatherData;
     const setClickedIndex = props.setClickedIndex;
-
+ 
+    
     return (
         <LocationsIndexStyle>
             {locations.map((location: any, i: number) => {
-                return <LocationCard setClickedIndex={setClickedIndex} location={location} setWeatherData={weatherDataSetter} choosingCity={choosingCityState} index={i} key={location.id}/>
+                return <LocationCard  setClickedIndex={setClickedIndex} location={location} setWeatherData={weatherDataSetter} choosingCity={choosingCityState} index={i} key={location.id}/>
             })}{}
         </LocationsIndexStyle>
     )
