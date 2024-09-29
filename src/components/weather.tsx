@@ -1,7 +1,7 @@
 import Card from "./ui/card"
 import WeatherCard from "./ui/weather-card"
 import SearchBar from "./ui/searchbar"
-import { useEffect, useState, useRef } from "react" 
+import { useEffect, useState, useRef, createContext } from "react" 
 import styled from "styled-components"
 import MakeObjectMappable from "../utils/makeObjectMappable"
 import mainWeatherSchema from "../utils/apiSchemas/weatherCondition"
@@ -34,6 +34,13 @@ const WeatherWrapper = styled.div`
         width: 100%;
     } 
 `
+
+interface IStateObject {
+    value: any;
+    setValue: (value: any) => void;
+}
+export const isErrorContext = createContext<IStateObject | undefined>(undefined);
+
 export default function Weather() {
     const [location, setLocation] = useState('');
     const [weatherData, setWeatherData] = useState(mainWeatherSchema);
@@ -42,6 +49,7 @@ export default function Weather() {
     const [isChoosingCity, setIsChoosingCity] = useState(false);
     const [clickedIndex, setClikedIndex] = useState(0);
     const [firstSearch, setFirstSearch] = useState<boolean>(false);
+    const [isError, setIsError] = useState<boolean>(false);
     const isFirstRender = useRef<boolean>(true);
     
 
@@ -60,6 +68,8 @@ export default function Weather() {
     const emojis = ['💧','🔎','😡','🌧️','☁️','💨'];
     
     const ApplicationState = () => {
+        if(isError) 
+            return <h1 style={{color: 'red'}}> Something went wrong </h1>
         if (cityNotFound) 
             return <h1 style={{ color: "red" }}> City Not Found</h1>;
         if (!firstSearch) 
@@ -72,12 +82,12 @@ export default function Weather() {
                     choosingCity={{ isChoosingCity, setIsChoosingCity }}
                     setWeatherData={(value: any) => setWeatherData(value)}
                 />
-            )
+            )   
         return (
             <>
                 <WeatherCard
                     city={
-                        locations.results[clickedIndex].name +" " +
+                        locations.results[clickedIndex].name + " " +
                         (locations.results[clickedIndex].admin1 != null ? locations.results[clickedIndex].admin1 : "")
                     }
                     temperature={weatherData.current.temperature_2m! + weatherData.current_units.temperature_2m}
@@ -95,18 +105,19 @@ export default function Weather() {
             </>     
         );
     }
+
     return (
         <WeatherWrapper>
-            <SearchBar 
-                ChoosingLocation={{isChoosingCity, setIsChoosingCity}} 
-                SetLocation={(value: any) => setLocations(value)} 
-                CityNotFound={{cityNotFound, setCityNotFound}} 
-                LocationState={{location, setLocation}} 
-                FirstSearchSetter={(value: boolean) => setFirstSearch(value)} 
-            />
+            <isErrorContext.Provider value={{value: isError, setValue: (value: boolean) => setIsError(value)}}>
+                <SearchBar
+                    ChoosingLocation={{ isChoosingCity, setIsChoosingCity }}
+                    SetLocation={(value: any) => setLocations(value)}
+                    CityNotFound={{ cityNotFound, setCityNotFound }}
+                    LocationState={{ location, setLocation }}
+                    FirstSearchSetter={(value: boolean) => setFirstSearch(value)}
+                />
+            </isErrorContext.Provider>
             {ApplicationState()}
-
         </WeatherWrapper>
-
-    )
+    );
 }

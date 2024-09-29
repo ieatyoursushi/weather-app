@@ -17,7 +17,7 @@ export default function LocationsIndex(props: any) {
     const choosingCityState = props.choosingCity;
     const weatherDataSetter = props.setWeatherData;
     const setClickedIndex = props.setClickedIndex;
- 
+    
     
     return (
         <LocationsIndexStyle>

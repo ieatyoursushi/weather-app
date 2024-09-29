@@ -1,6 +1,8 @@
 import styled from "styled-components";
-import { useEffect} from "react";
+import { useEffect, useContext} from "react";
 import GeoLocation from "../../services/services/api/geoLocationData";
+import { isErrorContext } from "../weather";
+import { LocationNotFoundError } from "../../utils/notFoundError";
 
 const SearchBarStyle = styled.div`
  
@@ -24,6 +26,9 @@ export default function SearchBar(props: any) {
     const cityNotFound = props.CityNotFound;
     const isChoosingLocationState = props.ChoosingLocation;
     const setLocations = props.SetLocation;
+    const context = useContext(isErrorContext);
+    const isError = context!.value;
+    const setIsError = context!.setValue;
 
     useEffect(()=> {
         console.log(locationState.location);
@@ -36,12 +41,10 @@ export default function SearchBar(props: any) {
             <button onClick={async () => {
                 if(locationState.location == '')
                     return;
- 
-                //in the index component's onclick, this onclick should set another boolean state
-                //fetch geolocation api in here instead of WeatherData
-                //change cityNotFound state for geolocation try catch instead of weatherData 
                 try {
+                    //make all t ypes of eerrors one state instead
                     setLocations(await GeoLocation(locationState.location));
+                    setIsError(false);
                     if(!isChoosingLocationState.isChoosingCity)
                         isChoosingLocationState.setIsChoosingCity(true);
                     if(cityNotFound.cityNotFound) 
@@ -49,7 +52,14 @@ export default function SearchBar(props: any) {
                     setFirstSearch(true);
                 } catch(err) {
                     console.error(err);
-                    cityNotFound.setCityNotFound(true);
+                    if(err instanceof LocationNotFoundError){
+                        setIsError(false);
+                        cityNotFound.setCityNotFound(true);
+                    } else {
+                        setIsError(true);
+                        cityNotFound.setCityNotFound(false);
+                        
+                    }
                     isChoosingLocationState.setIsChoosingCity(false);
                 }
                 /*
